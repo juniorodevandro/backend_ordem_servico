@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApi.Models
 {
@@ -7,6 +8,7 @@ namespace WebApi.Models
         [Key]
         public Guid Id { get; set; }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Required(ErrorMessage = "O campo 'Código' é obrigatório")]
         public int Codigo { get; set; }
 
@@ -22,14 +24,15 @@ namespace WebApi.Models
         [Required(ErrorMessage = "O campo 'Tipo' é obrigatório")]
         public int Tipo { get; set; }
 
-        [Required(ErrorMessage = "O campo 'Cliente' é obrigatório")]
-        public Pessoa? Cliente { get; set; }
-
-        [Required(ErrorMessage = "O campo 'Responsável' é obrigatório")]
-        public Pessoa? Responsavel { get; set; }
-
         public int Desconto { get; set; }
 
         public string? Observacao { get; set; }
+
+        [Required(ErrorMessage = "O campo 'Cliente' é obrigatório")]
+        public Pessoa? ClientePessoa { get; set; }
+
+        [Required(ErrorMessage = "O campo 'Responsável' é obrigatório")]
+        public Pessoa? ResponsavelPessoa { get; set; }
+
     }
 }

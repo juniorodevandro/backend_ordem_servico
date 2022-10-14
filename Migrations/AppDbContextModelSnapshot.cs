@@ -51,7 +51,10 @@ namespace WebApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Codigo")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Codigo"), 1L, 1);
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -80,11 +83,14 @@ namespace WebApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ClienteId")
+                    b.Property<Guid>("ClientePessoaId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Codigo")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Codigo"), 1L, 1);
 
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime2");
@@ -95,7 +101,7 @@ namespace WebApi.Migrations
                     b.Property<string>("Observacao")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ResponsavelId")
+                    b.Property<Guid>("ResponsavelPessoaId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Tipo")
@@ -109,9 +115,9 @@ namespace WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClienteId");
+                    b.HasIndex("ClientePessoaId");
 
-                    b.HasIndex("ResponsavelId");
+                    b.HasIndex("ResponsavelPessoaId");
 
                     b.ToTable("Ordem");
                 });
@@ -123,7 +129,10 @@ namespace WebApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Codigo")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Codigo"), 1L, 1);
 
                     b.Property<Guid>("ItemId")
                         .HasColumnType("uniqueidentifier");
@@ -157,7 +166,10 @@ namespace WebApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Codigo")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Codigo"), 1L, 1);
 
                     b.Property<string>("Observacao")
                         .IsRequired()
@@ -191,7 +203,10 @@ namespace WebApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Codigo")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Codigo"), 1L, 1);
 
                     b.Property<string>("Contato")
                         .IsRequired()
@@ -243,21 +258,21 @@ namespace WebApi.Migrations
 
             modelBuilder.Entity("WebApi.Models.Ordem", b =>
                 {
-                    b.HasOne("WebApi.Models.Pessoa", "Cliente")
+                    b.HasOne("WebApi.Models.Pessoa", "ClientePessoa")
                         .WithMany()
-                        .HasForeignKey("ClienteId")
+                        .HasForeignKey("ClientePessoaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WebApi.Models.Pessoa", "Responsavel")
+                    b.HasOne("WebApi.Models.Pessoa", "ResponsavelPessoa")
                         .WithMany()
-                        .HasForeignKey("ResponsavelId")
+                        .HasForeignKey("ResponsavelPessoaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Cliente");
+                    b.Navigation("ClientePessoa");
 
-                    b.Navigation("Responsavel");
+                    b.Navigation("ResponsavelPessoa");
                 });
 
             modelBuilder.Entity("WebApi.Models.OrdemItem", b =>

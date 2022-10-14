@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApi.Models
 {
@@ -7,6 +8,7 @@ namespace WebApi.Models
         [Key]
         public Guid Id { get; set; }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Required(ErrorMessage = "O campo 'Código' é obrigatório")]
         public int Codigo { get; set; }
 
