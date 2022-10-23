@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebApi.Data;
 using WebApi.Models;
 
@@ -7,7 +8,7 @@ namespace WebApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class PessoaController : ControllerBase
-    {
+    {  
         private readonly AppDbContext _context;
 
         public PessoaController(AppDbContext context)
@@ -16,34 +17,30 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> getPessoa()
-        {
-            try
-            {
-                var lista = _context.Pessoa.OrderBy(x => x.Nome);
-                return Ok(lista);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Erro de consulta a lista. Exception:{ex.Message}");
-            }
-        }
-
-        [HttpGet("{nome}")]
-        public async Task<IActionResult> getPessoa([FromRoute] string nome)
+        public async Task<IActionResult> getPessoa([FromQuery] int? codigo, string? nome, string? cpf)
         {
             Pessoa pessoa = new Pessoa();
 
             try
             {
-                pessoa = await _context.Pessoa.FindAsync(nome);
-
-                if (pessoa == null)
+                if (codigo > 0 || !String.IsNullOrEmpty(nome) || !String.IsNullOrEmpty(cpf))
                 {
-                    return NotFound($"Pessoa não encontrada com o nome: {nome}");
-                }
+                    pessoa = await _context.Pessoa.Where(e => e.Codigo == codigo || e.Nome == nome || e.Cpf == cpf).FirstOrDefaultAsync();
 
-                return Ok(nome);
+                    if (pessoa == null)
+                    {
+                        return NotFound($"Pessoa não encontrada com o código: {codigo}");
+                    }
+
+                    return Ok(pessoa);
+                }
+                else
+                {
+                    var list = _context.Pessoa.OrderBy(x => x.Nome);
+
+                    return Ok(list);
+                }               
+
             }
             catch (Exception ex)
             {
@@ -78,10 +75,9 @@ namespace WebApi.Controllers
         [HttpPut]
         public async Task<IActionResult> putPessoa(Pessoa pessoa)
         {
-
             try
             {
-                Pessoa pessoaAux = await _context.Pessoa.FindAsync(pessoa.Nome);                     
+                Pessoa pessoaAux = await _context.Pessoa.Where(e => e.Codigo == pessoa.Codigo).FirstOrDefaultAsync();
 
                 if (pessoaAux == null)
                 {
@@ -107,12 +103,12 @@ namespace WebApi.Controllers
 
         }
 
-        [HttpDelete("{codigo}")]
-        public async Task<IActionResult> deletePessoaNome(int codigo)
+        [HttpDelete]
+        public async Task<IActionResult> deletePessoa([FromQuery] int codigo)
         {
             try
             {
-                Pessoa pessoaAux = await _context.Pessoa.FindAsync(codigo);
+                Pessoa pessoaAux = await _context.Pessoa.Where(e => e.Codigo == codigo).FirstOrDefaultAsync();
 
                 if (pessoaAux == null)
                 {

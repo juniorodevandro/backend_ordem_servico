@@ -3,12 +3,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApi.Models
 {
+    [Table("Pessoa")]
     public class Pessoa
     {
         [Key]
         public Guid Id { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        //[DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Required(ErrorMessage = "O campo 'Código' é obrigatório")]
         public int Codigo { get; set; }
 
@@ -16,9 +18,10 @@ namespace WebApi.Models
         [Required(ErrorMessage = "O campo 'Nome' é obrigatório")]
         public string Nome { get; set; }
 
-        [StringLength(11, ErrorMessage = "O campo 'CPF' deve ter no máximo 11 caracteres", MinimumLength = 11)]
+        [StringLength(11, ErrorMessage = "O campo 'CPF' deve conter 11 caracteres", MinimumLength = 11)]
         public string Cpf { get; set; }
 
+        [Required(ErrorMessage = "O campo 'Tipo' é obrigatório")]
         public int Tipo { get; set; }
 
         public string Contato { get; set; }

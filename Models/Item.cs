@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApi.Models
 {
+    [Table("Item")]
     public class Item
     {
         [Key]
@@ -18,11 +19,11 @@ namespace WebApi.Models
         [Required(ErrorMessage = "O campo 'Tipo' é obrigatório")]
         public int Tipo { get; set; }
 
-        [Required(ErrorMessage = "O campo 'Cliente' é obrigatório")]
-        public Pessoa Cliente { get; set; }
-
         public string Observacao { get; set; }
 
-        public decimal ValorUnitario { get; set; }        
+        public decimal ValorUnitario { get; set; }
+
+        [Required(ErrorMessage = "O campo 'Cliente' é obrigatório")]
+        public Pessoa Cliente { get; set; }
     }
 }

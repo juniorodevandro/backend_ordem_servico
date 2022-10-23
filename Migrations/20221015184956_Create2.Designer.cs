@@ -12,8 +12,8 @@ using WebApi.Data;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221014230313_Ajustes2")]
-    partial class Ajustes2
+    [Migration("20221015184956_Create2")]
+    partial class Create2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -205,10 +205,7 @@ namespace WebApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Codigo")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Codigo"), 1L, 1);
 
                     b.Property<string>("Contato")
                         .IsRequired()
