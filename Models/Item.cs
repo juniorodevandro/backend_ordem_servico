@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace WebApi.Models
 {
@@ -7,9 +8,10 @@ namespace WebApi.Models
     public class Item
     {
         [Key]
+        [JsonIgnore]
         public Guid Id { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [JsonIgnore]
         [Required(ErrorMessage = "O campo 'Código' é obrigatório")]
         public int Codigo { get; set; }
 
@@ -23,7 +25,11 @@ namespace WebApi.Models
 
         public decimal ValorUnitario { get; set; }
 
+        [JsonIgnore]
         [Required(ErrorMessage = "O campo 'Cliente' é obrigatório")]
         public Pessoa Cliente { get; set; }
+
+        [Required]
+        public int ClienteCodigo { get; set; }
     }
 }
