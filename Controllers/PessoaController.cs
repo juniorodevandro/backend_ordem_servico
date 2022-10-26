@@ -19,7 +19,7 @@ namespace WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> getPessoa([FromQuery] int? codigo, string? nome, string? cpf)
         {
-            Pessoa pessoa = new Pessoa();
+            Pessoa? pessoa = new Pessoa();
 
             try
             {
@@ -29,14 +29,31 @@ namespace WebApi.Controllers
 
                     if (pessoa == null)
                     {
-                        return NotFound($"Pessoa não encontrada com o código: {codigo}");
+                        string mensagem = Environment.NewLine;
+
+                        if (codigo > 0)
+                        {
+                            mensagem = "Código:" + codigo.ToString();
+                        }
+
+                        if (!String.IsNullOrEmpty(nome))
+                        {
+                            mensagem += Environment.NewLine + "Nome: " + nome;
+                        }
+
+                        if (!String.IsNullOrEmpty(cpf))
+                        {
+                            mensagem += Environment.NewLine + "CPF: " + cpf;
+                        }
+
+                        return NotFound($"Pessoa não encontrada com o par o conjuto de informaçãoes: {mensagem}");
                     }
 
                     return Ok(pessoa);
                 }
                 else
                 {
-                    var list = _context.Pessoa.OrderBy(x => x.Nome);
+                    var list = _context.Pessoa.OrderBy(x => x.Codigo);
 
                     return Ok(list);
                 }               
@@ -53,11 +70,31 @@ namespace WebApi.Controllers
         {
             try
             {
+                var pessoaAux = _context.Pessoa.OrderByDescending(x => x.Codigo).First();
+
+                if (pessoaAux == null)
+                {
+                    pessoa.Codigo = 1;
+
+                }
+                else
+                {
+                    pessoa.Codigo = pessoaAux.Codigo + 1;
+                }
+
+                pessoaAux = await _context.Pessoa.Where(e => e.Cpf == pessoa.Cpf).FirstOrDefaultAsync();
+
+                if (pessoaAux != null)
+                {
+                    return BadRequest($"CPF duplicado, já existe uma outra pessoa cadastrada com o CPF informado: {pessoa.Cpf}");
+                }
+
                 await _context.Pessoa.AddAsync(pessoa);
                 var valor = await _context.SaveChangesAsync();
+
                 if (valor == 1)
                 {
-                    return Ok(pessoa);
+                    return Ok("Pessoa cadastrada com sucesso!");
                 }
                 else
                 {
@@ -69,7 +106,6 @@ namespace WebApi.Controllers
             {
                 return BadRequest($"Erro ao cadastrar pessoa. Exception: {ex.Message}");
             }
-
         }
 
         [HttpPut]
@@ -77,16 +113,16 @@ namespace WebApi.Controllers
         {
             try
             {
-                Pessoa pessoaAux = await _context.Pessoa.Where(e => e.Codigo == pessoa.Codigo).FirstOrDefaultAsync();
+                Pessoa? pessoaAux = await _context.Pessoa.Where(e => e.Codigo == pessoa.Codigo && e.Cpf == pessoa.Cpf).FirstOrDefaultAsync();
 
                 if (pessoaAux == null)
                 {
-                    return NotFound($"Pessoa não encontrada. Nome: {pessoa.Nome}");
+                    return NotFound($"Pessoa não encontrada. Código: {pessoa.Codigo}" + Environment.NewLine + $"Cpf: {pessoa.Cpf}");
                 }
 
-                pessoaAux.Nome = pessoa.Nome;
                 _context.Pessoa.Update(pessoaAux);
                 var valor = await _context.SaveChangesAsync();
+
                 if (valor == 1)
                 {
                     return Ok(pessoa);
@@ -108,7 +144,7 @@ namespace WebApi.Controllers
         {
             try
             {
-                Pessoa pessoaAux = await _context.Pessoa.Where(e => e.Codigo == codigo).FirstOrDefaultAsync();
+                Pessoa? pessoaAux = await _context.Pessoa.Where(e => e.Codigo == codigo).FirstOrDefaultAsync();
 
                 if (pessoaAux == null)
                 {

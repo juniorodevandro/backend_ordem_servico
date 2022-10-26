@@ -17,9 +17,9 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> getItem([FromQuery] int? codigo, string? nome)
+        public async Task<IActionResult> GetItem([FromQuery] int? codigo, string? nome)
         {
-            Item item = new Item();
+            Item? item = new Item();
 
             try
             {
@@ -29,80 +29,78 @@ namespace WebApi.Controllers
 
                     if (item == null)
                     {
-                        return NotFound($"Item não encontrada com o código: {codigo}");
+                        return NotFound($"Item não encontrado com o código: {codigo}");
                     }
 
                     return Ok(item);
                 }
                 else
                 {
-                    var lista = _context.Item.OrderBy(x => x.Nome);
+                    var lista = _context.Item.OrderBy(x => x.Codigo);
                     return Ok(lista);
                 }
 
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao consultar a item. Exception: {ex.Message}");
+                return BadRequest($"Erro ao consultar o item. Exception: {ex.Message}");
             } 
         }
 
         [HttpPost]
-        public async Task<IActionResult> postItem(Item item)
+        public async Task<IActionResult> PostItem(Item item)
         {
             try
             {
-                Pessoa pessoa = await _context.Pessoa.Where(e => e.Codigo == item.Cliente.Codigo).FirstOrDefaultAsync();
+                var itemAux = _context.Item.OrderByDescending(x => x.Codigo).First();
 
-                if (pessoa == null)
+                if (itemAux == null)
+                    item.Codigo = 1;
+                else
+                    item.Codigo++;
+
+                await _context.Item.AddAsync(item);
+                var valor = await _context.SaveChangesAsync();
+
+                if (valor == 1)
                 {
-                    return BadRequest("Não foi encontrado o cliente com esse código.");
+                    return Ok("Item cadastrado com sucesso!");
                 }
                 else
                 {
-                    item.Cliente = pessoa;
-
-                    await _context.Item.AddAsync(item);
-                    var valor = await _context.SaveChangesAsync();
-                    if (valor == 1)
-                    {
-                        return Ok(item);
-                    }
-                    else
-                    {
-                        return BadRequest("Item não cadastrada.");
-                    }
+                    return BadRequest("Item não cadastrado.");
                 }
+                
             }
             catch (Exception ex)
             {
                 return BadRequest($"Erro ao cadastrar item. Exception: {ex.Message}");
             }
-
         }
 
         [HttpPut]
-        public async Task<IActionResult> putItem(Item item)
+        public async Task<IActionResult> PutItem(Item item)
         {
             try
             {
-                Item itemAux = await _context.Item.Where(e => e.Codigo == item.Codigo).FirstOrDefaultAsync();
+                Item? itemAux = await _context.Item.Where(e => e.Codigo == item.Codigo).FirstOrDefaultAsync();
 
                 if (itemAux == null)
                 {
-                    return NotFound($"Item não encontrada. Nome: {item.Nome}");
+                    return NotFound($"Item não encontrado. Nome: {item.Nome}");
                 }
 
                 itemAux.Nome = item.Nome;
                 _context.Item.Update(itemAux);
                 var valor = await _context.SaveChangesAsync();
+
                 if (valor == 1)
                 {
                     return Ok(item);
                 }
                 else
                 {
-                    return BadRequest("Item não alterada.");
+                    return BadRequest("Item não alterado.");
                 }
             }
             catch (Exception ex)
@@ -113,26 +111,27 @@ namespace WebApi.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> deleteItem([FromQuery] int codigo)
+        public async Task<IActionResult> DeleteItem([FromQuery] int codigo)
         {
             try
             {
-                Item itemAux = await _context.Item.Where(e => e.Codigo == codigo).FirstOrDefaultAsync();
+                Item? itemAux = await _context.Item.Where(e => e.Codigo == codigo).FirstOrDefaultAsync();
 
                 if (itemAux == null)
                 {
-                    return NotFound($"Item não encontrada. Código: {codigo}");
+                    return NotFound($"Item não encontrado. Código: {codigo}");
                 }
 
                 _context.Item.Remove(itemAux);
                 var valor = await _context.SaveChangesAsync();
+
                 if (valor == 1)
                 {
-                    return Ok("Item excluída.");
+                    return Ok("Item excluído.");
                 }
                 else
                 {
-                    return BadRequest("Item não excluída.");
+                    return BadRequest("Item não excluído.");
                 }
 
             }

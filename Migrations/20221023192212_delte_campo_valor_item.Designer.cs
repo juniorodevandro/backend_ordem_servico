@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApi.Data;
 
@@ -11,9 +12,10 @@ using WebApi.Data;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221023192212_delte_campo_valor_item")]
+    partial class delte_campo_valor_item
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,12 +92,6 @@ namespace WebApi.Migrations
                     b.Property<string>("Observacao")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("QuantidadeItem")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("QuantidadeServico")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -103,13 +99,7 @@ namespace WebApi.Migrations
                     b.Property<decimal>("ValorBruto")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("ValorItem")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("ValorLiquido")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("ValorServico")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -128,11 +118,17 @@ namespace WebApi.Migrations
                     b.Property<int>("Codigo")
                         .HasColumnType("int");
 
+                    b.Property<int>("ItemCodigo")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("ItemId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Observacao")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrdemCodigo")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("OrdemId")
                         .HasColumnType("uniqueidentifier");
@@ -161,8 +157,14 @@ namespace WebApi.Migrations
                     b.Property<int>("Codigo")
                         .HasColumnType("int");
 
+                    b.Property<int>("ItemCodigo")
+                        .HasColumnType("int");
+
                     b.Property<string>("Observacao")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrdemCodigo")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("OrdemId")
                         .HasColumnType("uniqueidentifier");

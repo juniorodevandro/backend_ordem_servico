@@ -17,7 +17,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> getEstoque([FromQuery] string? nomeItem)
+        public async Task<IActionResult> GetEstoque([FromQuery] string? nomeItem)
         {
             try
             {
@@ -30,12 +30,19 @@ namespace WebApi.Controllers
                         return NotFound($"Item não encontrado no estoque");
                     }
 
-                    return Ok(estoque);
+                    var ordem = new OrdemItemDTO();
+                    return Ok(ordem);
                 }
                 else
                 {
                     var lista = _context.Estoque.OrderBy(x => x.Item.Nome);
-                    return Ok(lista);
+                    //return Ok(lista);
+
+                    var ordem = new OrdemItemDTO();
+
+                   
+
+                    return Ok(ordem);
                 }
             }
             catch (Exception ex)
@@ -43,23 +50,54 @@ namespace WebApi.Controllers
                 return BadRequest($"Erro de consulta a lista. Exception:{ex.Message}");
             }
         }
-
       
         [HttpPost]
-        public async Task<IActionResult> postEstoque(Estoque estoque)
-        {
+        public async Task<IActionResult> PostEstoque(EstoqueDTO request)
+        {   
             try
             {
-                await _context.Estoque.AddAsync(estoque);
-                var valor = await _context.SaveChangesAsync();
-                if (valor == 1)
+                var item = await _context.Item.Where(e => e.Codigo == request.ItemCodigo).FirstOrDefaultAsync();
+
+                if (item == null)
+                    return BadRequest($"Item não encontrado com o código {request.ItemCodigo}, consute os itens disponíveis para incluir no estoque");
+                
+                Estoque? estoqueAux = await _context.Estoque.Where(e => e.Item.Codigo == request.ItemCodigo).FirstOrDefaultAsync();
+
+                if (estoqueAux == null)
                 {
-                    return Ok(estoque);
+                    var newEstoque = new Estoque
+                    {
+                        Item = item,
+                        Quantidade = request.Quantidade
+                    };
+
+                    await _context.Estoque.AddAsync(newEstoque);
+                    var valor = await _context.SaveChangesAsync();
+
+                    if (valor == 1)
+                    {
+                        return Ok(request);
+                    }
+                    else
+                    {
+                        return BadRequest("Estoque não cadastrado.");
+                    }
                 }
                 else
                 {
-                    return BadRequest("Estoque não cadastrada.");
-                }       
+                    estoqueAux.Quantidade += request.Quantidade;
+                    _context.Estoque.Update(estoqueAux);
+
+                    var valor = await _context.SaveChangesAsync();
+                    if (valor == 1)
+                    {
+                        return Ok(estoqueAux);
+                    }
+                    else
+                    {
+                        return BadRequest("Estoque não alterado.");
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -68,43 +106,12 @@ namespace WebApi.Controllers
 
         }
 
-        [HttpPut]
-        public async Task<IActionResult> putEstoque(Estoque estoque)
-        {
-            try
-            {
-                Estoque estoqueAux = await _context.Estoque.Where(e => e.Item == estoque.Item).FirstOrDefaultAsync();
-
-                if (estoqueAux == null)
-                {
-                    return NotFound($"Estoque não encontrado para o produto. Nome: {estoque.Item.Nome}");
-                }
-
-                estoqueAux.Item = estoque.Item;
-                _context.Estoque.Update(estoqueAux);
-                var valor = await _context.SaveChangesAsync();
-                if (valor == 1)
-                {
-                    return Ok(estoque);
-                }
-                else
-                {
-                    return BadRequest("Estoque não alterado.");
-                }
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Erro ao alterar estoque. Exception: {ex.Message}");
-            }
-
-        }        
-
         [HttpGet("Paginacao")]
         public async Task<IActionResult> GetEstoquePaginacao([FromQuery] string? valor, int skip, int take, bool estoqueDesc)
         {
             try
             {
-                var lista = from o in _context.Estoque.ToList()
+                var lista =  from o in _context.Estoque.ToList()
                             select o;
 
                 if (!String.IsNullOrEmpty(valor))

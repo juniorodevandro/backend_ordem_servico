@@ -12,7 +12,7 @@ using WebApi.Data;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221015184926_Create")]
+    [Migration("20221023191159_Create")]
     partial class Create
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,7 +30,10 @@ namespace WebApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ItemId")
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ItemId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Quantidade")
@@ -38,7 +41,7 @@ namespace WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId");
+                    b.HasIndex("ItemId1");
 
                     b.ToTable("Estoque");
                 });
@@ -49,32 +52,24 @@ namespace WebApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ClienteId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("Codigo")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Codigo"), 1L, 1);
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Observacao")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Tipo")
-                        .HasColumnType("int");
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("ValorUnitario")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ClienteId");
 
                     b.ToTable("Item");
                 });
@@ -89,10 +84,7 @@ namespace WebApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Codigo")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Codigo"), 1L, 1);
 
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime2");
@@ -103,11 +95,9 @@ namespace WebApi.Migrations
                     b.Property<string>("Observacao")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ResponsavelId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Tipo")
-                        .HasColumnType("int");
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("ValorBruto")
                         .HasColumnType("decimal(18,2)");
@@ -119,8 +109,6 @@ namespace WebApi.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.HasIndex("ResponsavelId");
-
                     b.ToTable("Ordem");
                 });
 
@@ -131,17 +119,19 @@ namespace WebApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Codigo")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Codigo"), 1L, 1);
+                    b.Property<int>("ItemCodigo")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("ItemId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Observacao")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrdemCodigo")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("OrdemId")
                         .HasColumnType("uniqueidentifier");
@@ -168,14 +158,16 @@ namespace WebApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Codigo")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Codigo"), 1L, 1);
+                    b.Property<int>("ItemCodigo")
+                        .HasColumnType("int");
 
                     b.Property<string>("Observacao")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrdemCodigo")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("OrdemId")
                         .HasColumnType("uniqueidentifier");
@@ -208,16 +200,13 @@ namespace WebApi.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Contato")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Cpf")
-                        .IsRequired()
                         .HasMaxLength(11)
                         .HasColumnType("nvarchar(11)");
 
                     b.Property<string>("Endereco")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nome")
@@ -237,22 +226,11 @@ namespace WebApi.Migrations
                 {
                     b.HasOne("WebApi.Models.Item", "Item")
                         .WithMany()
-                        .HasForeignKey("ItemId")
+                        .HasForeignKey("ItemId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Item");
-                });
-
-            modelBuilder.Entity("WebApi.Models.Item", b =>
-                {
-                    b.HasOne("WebApi.Models.Pessoa", "Cliente")
-                        .WithMany()
-                        .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Cliente");
                 });
 
             modelBuilder.Entity("WebApi.Models.Ordem", b =>
@@ -263,15 +241,7 @@ namespace WebApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WebApi.Models.Pessoa", "Responsavel")
-                        .WithMany()
-                        .HasForeignKey("ResponsavelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Cliente");
-
-                    b.Navigation("Responsavel");
                 });
 
             modelBuilder.Entity("WebApi.Models.OrdemItem", b =>
@@ -283,7 +253,7 @@ namespace WebApi.Migrations
                         .IsRequired();
 
                     b.HasOne("WebApi.Models.Ordem", "Ordem")
-                        .WithMany()
+                        .WithMany("OrdemItem")
                         .HasForeignKey("OrdemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -296,7 +266,7 @@ namespace WebApi.Migrations
             modelBuilder.Entity("WebApi.Models.OrdemServico", b =>
                 {
                     b.HasOne("WebApi.Models.Ordem", "Ordem")
-                        .WithMany()
+                        .WithMany("OrdemServico")
                         .HasForeignKey("OrdemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -310,6 +280,13 @@ namespace WebApi.Migrations
                     b.Navigation("Ordem");
 
                     b.Navigation("Servico");
+                });
+
+            modelBuilder.Entity("WebApi.Models.Ordem", b =>
+                {
+                    b.Navigation("OrdemItem");
+
+                    b.Navigation("OrdemServico");
                 });
 #pragma warning restore 612, 618
         }

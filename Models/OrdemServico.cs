@@ -11,29 +11,22 @@ namespace WebApi.Models
         [JsonIgnore]
         public Guid Id { get; set; }
 
-        [JsonIgnore]
         [Required(ErrorMessage = "O campo 'Código' é obrigatório")]
         public int Codigo { get; set; }
 
         [JsonIgnore]
         [Required(ErrorMessage = "O campo 'Ordem de serviço' é obrigatório")]
-        public Ordem Ordem { get; set; }
-
-        [Required]
-        public int OrdemCodigo { get; set; }
+        public Ordem? Ordem { get; set; }
 
         [JsonIgnore]
         [Required(ErrorMessage = "O campo 'Serviço' é obrigatório")]
-        public Item Servico { get; set; }
-
-        [Required]        
-        public int ItemCodigo { get; set; }
+        public Item? Servico { get; set; }
 
         [Required(ErrorMessage = "O campo 'Quantidade' é obrigatório")]
         public decimal Quantidade { get; set; }
 
         public decimal ValorUnitario { get; set; }
 
-        public string Observacao { get; set; }
+        public string? Observacao { get; set; }
     }
 }

@@ -10,16 +10,32 @@ namespace WebApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Item",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Codigo = table.Column<int>(type: "int", nullable: false),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Observacao = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ValorUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Item", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Pessoa",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Codigo = table.Column<int>(type: "int", nullable: false),
                     Nome = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    Cpf = table.Column<string>(type: "nvarchar(11)", maxLength: 11, nullable: false),
+                    Cpf = table.Column<string>(type: "nvarchar(11)", maxLength: 11, nullable: true),
                     Tipo = table.Column<int>(type: "int", nullable: false),
-                    Contato = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Endereco = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Contato = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Endereco = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -27,25 +43,21 @@ namespace WebApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Item",
+                name: "Estoque",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Codigo = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Tipo = table.Column<int>(type: "int", nullable: false),
-                    ClienteId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Observacao = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ValorUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    ItemId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemId = table.Column<int>(type: "int", nullable: false),
+                    Quantidade = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Item", x => x.Id);
+                    table.PrimaryKey("PK_Estoque", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Item_Pessoa_ClienteId",
-                        column: x => x.ClienteId,
-                        principalTable: "Pessoa",
+                        name: "FK_Estoque_Item_ItemId1",
+                        column: x => x.ItemId1,
+                        principalTable: "Item",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -55,16 +67,14 @@ namespace WebApi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Codigo = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Codigo = table.Column<int>(type: "int", nullable: false),
                     Data = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ValorLiquido = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ValorBruto = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Tipo = table.Column<int>(type: "int", nullable: false),
+                    Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Desconto = table.Column<int>(type: "int", nullable: false),
                     Observacao = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClienteId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ResponsavelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    ClienteId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -75,31 +85,6 @@ namespace WebApi.Migrations
                         principalTable: "Pessoa",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Ordem_Pessoa_ResponsavelId",
-                        column: x => x.ResponsavelId,
-                        principalTable: "Pessoa",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Estoque",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Quantidade = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Estoque", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Estoque_Item_ItemId",
-                        column: x => x.ItemId,
-                        principalTable: "Item",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -107,13 +92,14 @@ namespace WebApi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Codigo = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Codigo = table.Column<int>(type: "int", nullable: false),
                     OrdemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrdemCodigo = table.Column<int>(type: "int", nullable: false),
                     ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemCodigo = table.Column<int>(type: "int", nullable: false),
                     Quantidade = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ValorUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Observacao = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Observacao = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -137,13 +123,14 @@ namespace WebApi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Codigo = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Codigo = table.Column<int>(type: "int", nullable: false),
                     OrdemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrdemCodigo = table.Column<int>(type: "int", nullable: false),
                     ServicoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemCodigo = table.Column<int>(type: "int", nullable: false),
                     Quantidade = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ValorUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Observacao = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Observacao = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -163,24 +150,14 @@ namespace WebApi.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Estoque_ItemId",
+                name: "IX_Estoque_ItemId1",
                 table: "Estoque",
-                column: "ItemId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Item_ClienteId",
-                table: "Item",
-                column: "ClienteId");
+                column: "ItemId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Ordem_ClienteId",
                 table: "Ordem",
                 column: "ClienteId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Ordem_ResponsavelId",
-                table: "Ordem",
-                column: "ResponsavelId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrdemItem_ItemId",

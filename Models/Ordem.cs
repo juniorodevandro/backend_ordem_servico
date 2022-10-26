@@ -11,39 +11,43 @@ namespace WebApi.Models
         [JsonIgnore]
         public Guid Id { get; set; }
 
-        [JsonIgnore]
         [Required(ErrorMessage = "O campo 'Código' é obrigatório")]
         public int Codigo { get; set; }
 
         [Required(ErrorMessage = "O campo 'Data' é obrigatório")]
         public DateTime Data { get; set; }
 
-        [Required(ErrorMessage = "O campo 'Valor líquido' é obrigatório")]
         public decimal ValorLiquido { get; set; }
 
-        [Required(ErrorMessage = "O campo 'Valor bruto' é obrigatório")]
         public decimal ValorBruto { get; set; }
 
-        [Required(ErrorMessage = "O campo 'Tipo' é obrigatório")]
-        public int Tipo { get; set; }
+        public decimal ValorItem { get; set; }
+
+        public decimal ValorServico { get; set; }
+
+        public decimal QuantidadeItem { get; set; }
+
+        public decimal QuantidadeServico { get; set; }
 
         public int Desconto { get; set; }
 
+        [Required(ErrorMessage = "O campo 'Tipo' é obrigatório")]
+        public string? Tipo { get; set; }
+
         public string? Observacao { get; set; }
 
-        [JsonIgnore]
         [Required(ErrorMessage = "O campo 'Cliente' é obrigatório")]
         public Pessoa? Cliente { get; set; }
 
-        [Required]
-        public int ClienteCodigo { get; set; }
+        public Guid ClienteId { get; set; }
 
-        [JsonIgnore]
-        [Required(ErrorMessage = "O campo 'Responsável' é obrigatório")]
-        public Pessoa? Reponsavel { get; set; }
+        //[Required(ErrorMessage = "O campo 'Responsável' é obrigatório")]
+        //public Pessoa? Responsavel { get; set; }
 
-        [Required]
-        public int ResponsavelCodigo { get; set; }
+        //public Guid ResponsavelId { get; set; }
 
+        public List<OrdemItem>? OrdemItem { get; set; }
+
+        public List<OrdemServico>? OrdemServico { get; set; }
     }
 }
