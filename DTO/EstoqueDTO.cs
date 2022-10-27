@@ -2,7 +2,9 @@
 {
     public class EstoqueDTO
     {
-        public int ItemCodigo { get; set; }
+        public string ItemCodigoReferencia { get; set; } = string.Empty;
+
+        public string ItemNome { get; set; } = string.Empty;
      
         public decimal Quantidade { get; set; }
     }

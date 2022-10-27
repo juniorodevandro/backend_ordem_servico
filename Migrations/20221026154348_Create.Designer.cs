@@ -12,7 +12,7 @@ using WebApi.Data;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221023191159_Create")]
+    [Migration("20221026154348_Create")]
     partial class Create
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,10 +30,7 @@ namespace WebApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("ItemId1")
+                    b.Property<Guid>("ItemId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Quantidade")
@@ -41,7 +38,7 @@ namespace WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId1");
+                    b.HasIndex("ItemId");
 
                     b.ToTable("Estoque");
                 });
@@ -65,9 +62,6 @@ namespace WebApi.Migrations
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("ValorUnitario")
-                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -95,6 +89,12 @@ namespace WebApi.Migrations
                     b.Property<string>("Observacao")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("QuantidadeItem")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("QuantidadeServico")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -102,7 +102,13 @@ namespace WebApi.Migrations
                     b.Property<decimal>("ValorBruto")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("ValorItem")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("ValorLiquido")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ValorServico")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -121,17 +127,11 @@ namespace WebApi.Migrations
                     b.Property<int>("Codigo")
                         .HasColumnType("int");
 
-                    b.Property<int>("ItemCodigo")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("ItemId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Observacao")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OrdemCodigo")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("OrdemId")
                         .HasColumnType("uniqueidentifier");
@@ -160,14 +160,8 @@ namespace WebApi.Migrations
                     b.Property<int>("Codigo")
                         .HasColumnType("int");
 
-                    b.Property<int>("ItemCodigo")
-                        .HasColumnType("int");
-
                     b.Property<string>("Observacao")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OrdemCodigo")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("OrdemId")
                         .HasColumnType("uniqueidentifier");
@@ -214,8 +208,9 @@ namespace WebApi.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
-                    b.Property<int>("Tipo")
-                        .HasColumnType("int");
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -226,7 +221,7 @@ namespace WebApi.Migrations
                 {
                     b.HasOne("WebApi.Models.Item", "Item")
                         .WithMany()
-                        .HasForeignKey("ItemId1")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

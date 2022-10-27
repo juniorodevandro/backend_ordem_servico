@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol;
 using WebApi.Data;
 using WebApi.Models;
 
@@ -21,36 +22,33 @@ namespace WebApi.Controllers
         {
             try
             {
-                var lista = _context.Ordem.OrderBy(x => x.Codigo);
-                return Ok(lista);
+                //-- AJUSTAR FUTURAMENTE
+                /*var lista = from a in await _context.Ordem.ToListAsync()
+                            join b in _context.OrdemItem on a.Id equals b.Ordem.Id
+                            join c in _context.Item on b.Item.Id equals c.Id
+                            join d in await _context.OrdemServico.ToListAsync() on a.Id equals d.Ordem.Id
+                            join e in _context.Item on d.Servico.Id equals e.Id
+                            join f in _context.Pessoa on a.Cliente.Id equals f.Id
+                            //join g in _context.Pessoa on a.Responsavel.Id equals g.Id
+                            select new OrdemDTO
+                            {
+                                //ClienteCPF = (from a in OrdemItem)
+
+                            };
+                 */            
+
+                var lista = await _context.Ordem.OrderBy(x => x.Codigo).
+                    //Include(x => x.OrdemItem).
+                    //Include(x => x.OrdemServico).
+                    ToListAsync();
+
+               return Ok(lista);
             }
             catch (Exception ex)
             {
                 return BadRequest($"Erro de consulta a lista. Exception:{ex.Message}");
             }
-        }
-
-        [HttpGet("{codigo}")]
-        public async Task<IActionResult> GetOrdem([FromRoute] int codigo)
-        {
-            Ordem? ordem = new Ordem();
-
-            try
-            {
-                ordem = await _context.Ordem.FindAsync(codigo);                
-
-                if (ordem == null)
-                {
-                    return NotFound($"Ordem não encontrado com o codigo: {codigo}");
-                }
-
-                return Ok(codigo);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Erro ao consultar a ordem. Exception: {ex.Message}");
-            }
-        }
+        }       
 
         [HttpPost]
         public async Task<IActionResult> PostOrdem(OrdemDTO request)
@@ -80,10 +78,10 @@ namespace WebApi.Controllers
                 
                 foreach (var item in request.OrdemItem)
                 {                    
-                    var itemAux = await _context.Item.Where(e => e.Codigo == item.ItemCodigo).FirstOrDefaultAsync();
+                    var itemAux = await _context.Item.Where(e => e.CodigoReferencia == item.ItemCodigoReferencia).FirstOrDefaultAsync();
 
                     if (itemAux == null)
-                        return BadRequest($"Item não encontrado com o código {item.ItemCodigo}, consulte os itens disponíveis para incluir na ordem");
+                        return BadRequest($"Item não encontrado com o código {item.ItemCodigoReferencia}, consulte os itens disponíveis para incluir na ordem");
 
                     OrdemItem ordemItem = new OrdemItem
                     {
@@ -106,10 +104,10 @@ namespace WebApi.Controllers
 
                 foreach (var servico in request.OrdemServico)
                 {
-                    var servicoAux = await _context.Item.Where(e => e.Codigo == servico.ItemCodigo).FirstOrDefaultAsync();
+                    var servicoAux = await _context.Item.Where(e => e.CodigoReferencia == servico.ItemCodigoReferencia).FirstOrDefaultAsync();
 
                     if (servicoAux == null)
-                        return BadRequest($"Item não encontrado com o código {servico.ItemCodigo}, consulte os itens disponíveis para incluir na ordem");
+                        return BadRequest($"Item não encontrado com o código de referência {servico.ItemCodigoReferencia}, consulte os itens disponíveis para incluir na ordem");
 
                     OrdemServico ordemServico = new OrdemServico
                     {
@@ -150,12 +148,12 @@ namespace WebApi.Controllers
                     Observacao = request.Observacao,
                 };
 
-                var ordemAux = _context.Ordem.OrderByDescending(x => x.Codigo).FirstOrDefaultAsync();
+                var ordemAux = await _context.Ordem.OrderByDescending(x => x.Codigo).FirstOrDefaultAsync();
 
                 if (ordemAux == null) 
                     ordem.Codigo = 1;
                 else              
-                    ordem.Codigo++; 
+                    ordem.Codigo = ordemAux.Codigo + 1; 
                 
                 await _context.Ordem.AddAsync(ordem);                              
 
@@ -173,7 +171,7 @@ namespace WebApi.Controllers
 
                 var valor = await _context.SaveChangesAsync();
 
-                if (valor == 1)
+                if (valor > 0)
                     return Ok("Ordem cadastrada com sucesso!");
                 else
                     return BadRequest("Ordem não cadastrada.");
@@ -184,29 +182,25 @@ namespace WebApi.Controllers
             }
         }
 
+        //-- SEM EDITAR POR ENQUANTO
+        /*
         [HttpPut]
         public async Task<IActionResult> PutOrdem(Ordem ordem)
         {
             try
             {
-                Ordem? ordemAux = await _context.Ordem.FindAsync(ordem.Codigo);
+                var ordemAux = await _context.Ordem.FindAsync(ordem.Codigo);
 
                 if (ordemAux == null)
-                {
                     return NotFound($"Ordem não encontrada. Codigo: {ordem.Codigo}");
-                }
-
-                ordemAux.Codigo = ordem.Codigo;
+                
                 _context.Ordem.Update(ordemAux);
                 var valor = await _context.SaveChangesAsync();
-                if (valor == 1)
-                {
+
+                if (valor > 0)
                     return Ok(ordem);
-                }
                 else
-                {
                     return BadRequest("Ordem não alterada.");
-                }
             }
             catch (Exception ex)
             {
@@ -214,30 +208,25 @@ namespace WebApi.Controllers
             }
 
         }
+        */
 
-        [HttpDelete("{codigo}")]
+        [HttpDelete]
         public async Task<IActionResult> DeleteOrdemCodigo(int codigo)
         {
             try
             {
-                Ordem? ordemAux = await _context.Ordem.FindAsync(codigo);
+                var ordemAux = await _context.Ordem.Where(e => e.Codigo == codigo).FirstOrDefaultAsync();
 
                 if (ordemAux == null)
-                {
                     return NotFound($"Ordem não encontrada. Codigo: {codigo}");
-                }
 
                 _context.Ordem.Remove(ordemAux);
                 var valor = await _context.SaveChangesAsync();
-                if (valor == 1)
-                {
-                    return Ok("Ordem excluída.");
-                }
-                else
-                {
-                    return BadRequest("Ordem não excluída.");
-                }
 
+                if (valor > 1)
+                    return Ok("Ordem excluída.");                
+                else
+                    return BadRequest("Ordem não excluída.");
             }
             catch (Exception ex)
             {
@@ -250,7 +239,7 @@ namespace WebApi.Controllers
         {
             try
             {
-                var lista = from o in _context.Ordem.ToList()
+                var lista = from o in await _context.Ordem.ToListAsync()
                             select o;
 
                 if (!String.IsNullOrEmpty(valor))

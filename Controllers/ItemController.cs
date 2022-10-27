@@ -19,13 +19,11 @@ namespace WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetItem([FromQuery] int? codigo, string? nome)
         {
-            Item? item = new Item();
-
             try
             {
                 if (codigo > 0 || !String.IsNullOrEmpty(nome))
                 {
-                    item = await _context.Item.Where(e => e.Codigo == codigo || e.Nome == nome).FirstOrDefaultAsync();
+                    var item = await _context.Item.Where(e => e.Codigo == codigo || e.Nome == nome).ToListAsync();
 
                     if (item == null)
                     {
@@ -36,7 +34,7 @@ namespace WebApi.Controllers
                 }
                 else
                 {
-                    var lista = _context.Item.OrderBy(x => x.Codigo);
+                    var lista = await _context.Item.OrderBy(x => x.Codigo).ToListAsync();
                     return Ok(lista);
                 }
 
@@ -52,24 +50,27 @@ namespace WebApi.Controllers
         {
             try
             {
-                var itemAux = _context.Item.OrderByDescending(x => x.Codigo).First();
+                var itemAux = await _context.Item.Where(e => e.CodigoReferencia == item.CodigoReferencia).FirstOrDefaultAsync();
+
+                if (itemAux != null)
+                    return BadRequest($"Código de referência duplicado, " +
+                                      $"já existe uma outra item cadastrado com o código de referência informado: {item.CodigoReferencia}" +
+                                      Environment.NewLine + $"Nome: {item.Nome}");
+
+                itemAux = await _context.Item.OrderByDescending(x => x.Codigo).FirstOrDefaultAsync();
 
                 if (itemAux == null)
                     item.Codigo = 1;
                 else
-                    item.Codigo++;
+                    item.Codigo = itemAux.Codigo + 1;
 
                 await _context.Item.AddAsync(item);
                 var valor = await _context.SaveChangesAsync();
 
-                if (valor == 1)
-                {
+                if (valor > 0)
                     return Ok("Item cadastrado com sucesso!");
-                }
                 else
-                {
                     return BadRequest("Item não cadastrado.");
-                }
                 
             }
             catch (Exception ex)
@@ -83,57 +84,44 @@ namespace WebApi.Controllers
         {
             try
             {
-                Item? itemAux = await _context.Item.Where(e => e.Codigo == item.Codigo).FirstOrDefaultAsync();
+                var itemAux = await _context.Item.Where(e => e.CodigoReferencia == item.CodigoReferencia || e.Codigo == item.Codigo).FirstOrDefaultAsync();
 
-                if (itemAux == null)
-                {
-                    return NotFound($"Item não encontrado. Nome: {item.Nome}");
-                }
+                if (itemAux == null)                
+                    return NotFound($"Item não encontrado. Codigo de referência: {item.CodigoReferencia}");                
 
                 itemAux.Nome = item.Nome;
                 _context.Item.Update(itemAux);
+
                 var valor = await _context.SaveChangesAsync();
 
-                if (valor == 1)
-                {
+                if (valor > 0)
                     return Ok(item);
-                }
                 else
-                {
                     return BadRequest("Item não alterado.");
-                }
             }
             catch (Exception ex)
             {
                 return BadRequest($"Erro ao alterar item. Exception: {ex.Message}");
             }
-
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteItem([FromQuery] int codigo)
+        public async Task<IActionResult> DeleteItem([FromQuery] string codigoReferencia)
         {
             try
             {
-                Item? itemAux = await _context.Item.Where(e => e.Codigo == codigo).FirstOrDefaultAsync();
+                var itemAux = await _context.Item.Where(e => e.CodigoReferencia == codigoReferencia).FirstOrDefaultAsync();
 
                 if (itemAux == null)
-                {
-                    return NotFound($"Item não encontrado. Código: {codigo}");
-                }
+                    return NotFound($"Item não encontrado. Código de referência: {codigoReferencia}");
 
                 _context.Item.Remove(itemAux);
                 var valor = await _context.SaveChangesAsync();
 
-                if (valor == 1)
-                {
+                if (valor > 0)
                     return Ok("Item excluído.");
-                }
                 else
-                {
                     return BadRequest("Item não excluído.");
-                }
-
             }
             catch (Exception ex)
             {
@@ -146,7 +134,7 @@ namespace WebApi.Controllers
         {
             try
             {
-                var lista = from o in _context.Item.ToList()
+                var lista = from o in await _context.Item.ToListAsync()
                             select o;
 
                 if (!String.IsNullOrEmpty(valor))

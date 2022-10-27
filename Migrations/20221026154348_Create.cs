@@ -17,8 +17,7 @@ namespace WebApi.Migrations
                     Codigo = table.Column<int>(type: "int", nullable: false),
                     Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Observacao = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ValorUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Observacao = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -33,7 +32,7 @@ namespace WebApi.Migrations
                     Codigo = table.Column<int>(type: "int", nullable: false),
                     Nome = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Cpf = table.Column<string>(type: "nvarchar(11)", maxLength: 11, nullable: true),
-                    Tipo = table.Column<int>(type: "int", nullable: false),
+                    Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Contato = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Endereco = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -47,16 +46,15 @@ namespace WebApi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemId = table.Column<int>(type: "int", nullable: false),
+                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Quantidade = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Estoque", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Estoque_Item_ItemId1",
-                        column: x => x.ItemId1,
+                        name: "FK_Estoque_Item_ItemId",
+                        column: x => x.ItemId,
                         principalTable: "Item",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -71,8 +69,12 @@ namespace WebApi.Migrations
                     Data = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ValorLiquido = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ValorBruto = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ValorItem = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ValorServico = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    QuantidadeItem = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    QuantidadeServico = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Desconto = table.Column<int>(type: "int", nullable: false),
+                    Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Observacao = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ClienteId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -94,9 +96,7 @@ namespace WebApi.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Codigo = table.Column<int>(type: "int", nullable: false),
                     OrdemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrdemCodigo = table.Column<int>(type: "int", nullable: false),
                     ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemCodigo = table.Column<int>(type: "int", nullable: false),
                     Quantidade = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ValorUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Observacao = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -125,9 +125,7 @@ namespace WebApi.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Codigo = table.Column<int>(type: "int", nullable: false),
                     OrdemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrdemCodigo = table.Column<int>(type: "int", nullable: false),
                     ServicoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemCodigo = table.Column<int>(type: "int", nullable: false),
                     Quantidade = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ValorUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Observacao = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -150,9 +148,9 @@ namespace WebApi.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Estoque_ItemId1",
+                name: "IX_Estoque_ItemId",
                 table: "Estoque",
-                column: "ItemId1");
+                column: "ItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Ordem_ClienteId",

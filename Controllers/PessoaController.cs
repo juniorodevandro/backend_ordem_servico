@@ -19,13 +19,11 @@ namespace WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> getPessoa([FromQuery] int? codigo, string? nome, string? cpf)
         {
-            Pessoa? pessoa = new Pessoa();
-
             try
             {
                 if (codigo > 0 || !String.IsNullOrEmpty(nome) || !String.IsNullOrEmpty(cpf))
                 {
-                    pessoa = await _context.Pessoa.Where(e => e.Codigo == codigo || e.Nome == nome || e.Cpf == cpf).FirstOrDefaultAsync();
+                    var pessoa = await _context.Pessoa.Where(e => e.Codigo == codigo || e.Nome == nome || e.Cpf == cpf).ToListAsync();
 
                     if (pessoa == null)
                     {
@@ -53,11 +51,10 @@ namespace WebApi.Controllers
                 }
                 else
                 {
-                    var list = _context.Pessoa.OrderBy(x => x.Codigo);
+                    var list = await _context.Pessoa.OrderBy(x => x.Codigo).FirstOrDefaultAsync();
 
                     return Ok(list);
                 }               
-
             }
             catch (Exception ex)
             {
@@ -70,37 +67,25 @@ namespace WebApi.Controllers
         {
             try
             {
-                var pessoaAux = _context.Pessoa.OrderByDescending(x => x.Codigo).First();
+                var pessoaAux = await _context.Pessoa.Where(e => e.Cpf == pessoa.Cpf).FirstOrDefaultAsync();
+
+                if (pessoaAux != null)               
+                    return BadRequest($"CPF duplicado, já existe uma outra pessoa cadastrada com o CPF informado: {pessoa.Cpf}");
+
+                pessoaAux = await _context.Pessoa.OrderByDescending(x => x.Codigo).FirstOrDefaultAsync();
 
                 if (pessoaAux == null)
-                {
                     pessoa.Codigo = 1;
-
-                }
-                else
-                {
+                else               
                     pessoa.Codigo = pessoaAux.Codigo + 1;
-                }
-
-                pessoaAux = await _context.Pessoa.Where(e => e.Cpf == pessoa.Cpf).FirstOrDefaultAsync();
-
-                if (pessoaAux != null)
-                {
-                    return BadRequest($"CPF duplicado, já existe uma outra pessoa cadastrada com o CPF informado: {pessoa.Cpf}");
-                }
 
                 await _context.Pessoa.AddAsync(pessoa);
                 var valor = await _context.SaveChangesAsync();
 
-                if (valor == 1)
-                {
-                    return Ok("Pessoa cadastrada com sucesso!");
-                }
+                if (valor > 0)                
+                    return Ok("Pessoa cadastrada com sucesso!");                
                 else
-                {
                     return BadRequest("Pessoa não cadastrada.");
-                }
-
             }
             catch (Exception ex)
             {
@@ -123,14 +108,10 @@ namespace WebApi.Controllers
                 _context.Pessoa.Update(pessoaAux);
                 var valor = await _context.SaveChangesAsync();
 
-                if (valor == 1)
-                {
-                    return Ok(pessoa);
-                }
+                if (valor > 0)               
+                    return Ok(pessoa);                
                 else
-                {
                     return BadRequest("Pessoa não alterada.");
-                }
             }
             catch (Exception ex)
             {
@@ -153,15 +134,11 @@ namespace WebApi.Controllers
 
                 _context.Pessoa.Remove(pessoaAux);
                 var valor = await _context.SaveChangesAsync();
-                if (valor == 1)
-                {
-                    return Ok("Pessoa excluída.");
-                }
-                else
-                {
-                    return BadRequest("Pessoa não excluída.");
-                }
 
+                if (valor > 0)
+                    return Ok("Pessoa excluída.");
+                else
+                    return BadRequest("Pessoa não excluída.");
             }
             catch (Exception ex)
             {
@@ -174,7 +151,7 @@ namespace WebApi.Controllers
         {
             try
             {
-                var lista = from o in _context.Pessoa.ToList()
+                var lista = from o in await _context.Pessoa.ToListAsync()
                             select o;
 
                 if (!String.IsNullOrEmpty(valor))

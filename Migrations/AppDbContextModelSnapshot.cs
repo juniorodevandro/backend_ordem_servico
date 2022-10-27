@@ -28,10 +28,7 @@ namespace WebApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("ItemId1")
+                    b.Property<Guid>("ItemId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Quantidade")
@@ -39,7 +36,7 @@ namespace WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId1");
+                    b.HasIndex("ItemId");
 
                     b.ToTable("Estoque");
                 });
@@ -52,6 +49,10 @@ namespace WebApi.Migrations
 
                     b.Property<int>("Codigo")
                         .HasColumnType("int");
+
+                    b.Property<string>("CodigoReferencia")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -221,8 +222,8 @@ namespace WebApi.Migrations
             modelBuilder.Entity("WebApi.Models.Estoque", b =>
                 {
                     b.HasOne("WebApi.Models.Item", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId1")
+                        .WithMany("Estoque")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -276,6 +277,11 @@ namespace WebApi.Migrations
                     b.Navigation("Ordem");
 
                     b.Navigation("Servico");
+                });
+
+            modelBuilder.Entity("WebApi.Models.Item", b =>
+                {
+                    b.Navigation("Estoque");
                 });
 
             modelBuilder.Entity("WebApi.Models.Ordem", b =>
